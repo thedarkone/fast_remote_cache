@@ -23,7 +23,8 @@ require 'fileutils'
 from = ARGV.shift or abort "need source directory"
 to   = ARGV.shift or abort "need target directory"
 
-exclude = ARGV
+exclude    = ARGV
+gitmodules = File.readlines('.gitmodules').map {|line| line =~ /\[submodule "([^"]+)"\]/ && $1 }.compact rescue []
 
 from = File.expand_path(from)
 to   = File.expand_path(to)
@@ -41,7 +42,9 @@ Dir.chdir(from) do
     source = File.join(from, item)
     target = File.join(to, item)
 
-    if File.symlink?(item)
+    if gitmodules.include?(item)
+      FileUtils.ln_s(source, target)
+    elsif File.symlink?(item)
       FileUtils.ln_s(File.readlink(source), target)
     elsif File.directory?(item)
       queue += Dir.glob("#{item}/*", File::FNM_DOTMATCH)
