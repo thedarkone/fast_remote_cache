@@ -23,11 +23,12 @@ require 'fileutils'
 from = ARGV.shift or abort "need source directory"
 to   = ARGV.shift or abort "need target directory"
 
-exclude    = ARGV
-gitmodules = File.readlines('.gitmodules').map {|line| line =~ /\[submodule "([^"]+)"\]/ && $1 }.compact rescue []
+exclude = ARGV
 
 from = File.expand_path(from)
 to   = File.expand_path(to)
+
+gitmodules = File.readlines(File.join(from, '.gitmodules')).map {|line| line =~ /\[submodule "([^"]+)"\]/ && $1 }.compact rescue []
 
 Dir.chdir(from) do
   FileUtils.mkdir_p(to)
